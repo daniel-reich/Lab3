@@ -369,8 +369,9 @@ public class theRobot extends JFrame {
     // initializes the probabilities of where the AI is
     void initializeProbabilities() {
         probs = new double[mundo.width][mundo.height];
-        //Vs = new double[mundo.width][mundo.height];
+
         // if the robot's initial position is known, reflect that in the probability map
+
         if (knownPosition) {
             for (int y = 0; y < mundo.height; y++) {
                 for (int x = 0; x < mundo.width; x++) {
@@ -403,7 +404,7 @@ public class theRobot extends JFrame {
             }
         }
         
-//        myMaps.repaintValues(probs);
+        myMaps.repaintValues(probs);
     }
       // TODO: update the probabilities of where the AI thinks it is based on the action selected and the new sonar readings
     //       To do this, you should update the 2D-array "probs"
@@ -448,6 +449,7 @@ public class theRobot extends JFrame {
     {
         if (x == 0 || y == 0 || x == mundo.width - 1 || y == mundo.height - 1 || mundo.grid[x][y] != 0) return 0;
 
+        //p(s`|s,a)
         double p1 = probs[x][y - 1] * (action == SOUTH ? moveProb : (1 - moveProb)/4);
         double p2 = probs[x][y + 1] * (action == NORTH ? moveProb : (1 - moveProb)/4);
         double p3 = probs[x - 1][y] * (action == EAST ? moveProb : (1 - moveProb)/4);
@@ -467,10 +469,10 @@ public class theRobot extends JFrame {
     {
         if (x == 0 || y == 0 || x == mundo.width - 1 || y == mundo.height - 1) return 0;
         String actual = getRealSonar(x, y);
-        double p1 = actual.charAt(0) == sonarReading.charAt(0)? sensorAccuracy: 1 - sensorAccuracy;
-        double p2 = actual.charAt(1) == sonarReading.charAt(1)? sensorAccuracy: 1 - sensorAccuracy;
-        double p3 = actual.charAt(2) == sonarReading.charAt(2)? sensorAccuracy: 1 - sensorAccuracy;
-        double p4 = actual.charAt(3) == sonarReading.charAt(3)? sensorAccuracy: 1 - sensorAccuracy;
+        double p1 = actual.charAt(0) == sonarReading.charAt(0) ? sensorAccuracy: 1 - sensorAccuracy;
+        double p2 = actual.charAt(1) == sonarReading.charAt(1) ? sensorAccuracy: 1 - sensorAccuracy;
+        double p3 = actual.charAt(2) == sonarReading.charAt(2) ? sensorAccuracy: 1 - sensorAccuracy;
+        double p4 = actual.charAt(3) == sonarReading.charAt(3) ? sensorAccuracy: 1 - sensorAccuracy;
         return p1 * p2 * p3 * p4;
     }
 
@@ -490,6 +492,7 @@ public class theRobot extends JFrame {
     int automaticAction() {
 
         HashMap<Integer, Double> actions = new HashMap<Integer, Double>();
+
         actions.put(NORTH, calcUtilities(NORTH));
         actions.put(SOUTH, calcUtilities(SOUTH));
         actions.put(EAST, calcUtilities(EAST));
@@ -513,9 +516,8 @@ public class theRobot extends JFrame {
 
         double sum = 0;
 
-        for (int x = 0; x < mundo.width; x++) {
-            for (int y = 0; y < mundo.height; y++) {
-//                sum += getMovementUtility(x, y, action);
+        for (int y = 0; y < mundo.height; y++) {
+            for (int x = 0; x < mundo.width; x++) {
                 sum += probs[x][y] * _Qs[x][y];
             }
         }
@@ -560,7 +562,7 @@ public class theRobot extends JFrame {
                 else
                     action = automaticAction(); // TODO: get the action selected by your AI;
                                                 // you'll need to write this function for part III
-                
+
                 sout.println(action); // send the action to the Server
                 
                 // get sonar readings after the robot moves
@@ -602,8 +604,8 @@ public class theRobot extends JFrame {
 
         initializeValues();
 
-        for (int x = 0; x < mundo.width; x++) {
-            for (int y = 0; y < mundo.height; y++) {
+        for (int y = 0; y < mundo.height; y++) {
+            for (int x = 0; x < mundo.width; x++) {
                 Rs[x][y] = Vs[x][y];
             }
         }
@@ -614,8 +616,8 @@ public class theRobot extends JFrame {
 
             System.out.println("Values:");
 
-            for (int x = 0; x < mundo.width; x++) {
-                for (int y = 0; y < mundo.height; y++) {
+            for (int y = 0; y < mundo.height; y++) {
+                for (int x = 0; x < mundo.width; x++) {
                     System.out.printf("%s \t", Vs[x][y]);
                     if (mundo.grid[x][y] == 0) {
 
@@ -641,24 +643,17 @@ public class theRobot extends JFrame {
         }
 
 
-        //normalize(Vs);
-        //myMaps.repaintValues(Vs);
+//        normalize(Vs);
+//        myMaps.repaintValues(Vs);
     }
 
     private double[][] calcQs(int action) {
 
         double[][] _Qs = new double[mundo.width][mundo.height];
 
-        for (int x = 0; x < mundo.width; x++) {
-            for (int y = 0; y < mundo.height; y++) {
+        for (int y = 0; y < mundo.height; y++) {
+            for (int x = 0; x < mundo.width; x++) {
                 _Qs[x][y] = getValue(x, y, action);
-
-//                double sumSouth = getValue(x, y, SOUTH);
-//                double sumEast = getValue(x, y, EAST);
-//                double sumWest = getValue(x, y, WEST);
-//                double sumStay = getValue(x, y, STAY);
-//                sum = sumNorth + sumSouth + sumEast + sumWest + sumStay;
-
             }
         }
         return _Qs;
@@ -692,23 +687,16 @@ public class theRobot extends JFrame {
                     Vs[x][y] = 0;
                 }
                 else if (mundo.grid[x][y] == 0) { //Open Space
-                    Vs[x][y] = 0;
+                    Vs[x][y] = -1;
                 }
                 else if (mundo.grid[x][y] == 2) { //Death
-                    Vs[x][y] = -100;
+                    Vs[x][y] = -1000;
                 }
                 else if (mundo.grid[x][y] == 3) { //Goal
                     Vs[x][y] = 1000;
                 }
             }
         }
-
-//        for (int y = 0; y < mundo.height; y++) {
-//            for (int x = 0; x < mundo.width; x++) {
-//                System.out.printf("%s \t", Vs[x][y]);
-//            }
-//            System.out.printf("%n");
-//        }
     }
 
     // java theRobot [manual/automatic] [delay]
